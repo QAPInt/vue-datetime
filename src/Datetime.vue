@@ -42,10 +42,10 @@
                         </div>
                         <div v-show="show === 'time'" class="vdatetime-popup__list-picker-wrapper">
                             <div class="vdatetime-popup__list-picker vdatetime-popup__list-picker--half" ref="hourPicker">
-                                <div class="vdatetime-popup__list-picker__item" v-for="hour in hours" @click="selectHour(hour.number)" :class="{'vdatetime-popup__list-picker__item--selected': hour.selected}">{{ hour.number }}</div>
+                                <div class="vdatetime-popup__list-picker__item" v-for="hour in hours" @click="!hour.disabled && selectHour(hour.number)" :class="{'vdatetime-popup__list-picker__item--selected': hour.selected, 'vdatetime-popup__list-picker__item--disabled': hour.disabled}">{{ hour.number }}</div>
                             </div>
                             <div class="vdatetime-popup__list-picker vdatetime-popup__list-picker--half" ref="minutePicker">
-                                <div class="vdatetime-popup__list-picker__item" v-for="minute in minutes" @click="selectMinute(minute.number)" :class="{'vdatetime-popup__list-picker__item--selected': minute.selected}">{{ minute.number }}</div>
+                                <div class="vdatetime-popup__list-picker__item" v-for="minute in minutes" @click="!minute.disabled && selectMinute(minute.number)" :class="{'vdatetime-popup__list-picker__item--selected': minute.selected, 'vdatetime-popup__list-picker__item--disabled': minute.disabled}">{{ minute.number }}</div>
                             </div>
                         </div>
                         <div v-show="show === 'year'" class="vdatetime-popup__list-picker-wrapper">
@@ -110,6 +110,10 @@
         default () {
           return []
         }
+      },
+      minTime: {
+        type: String,
+        default: null
       },
       mondayFirst: {
         type: Boolean,
@@ -211,7 +215,8 @@
         return util.hours().map(hour => {
           return {
             number: hour,
-            selected: parseInt(hour) === parseInt(this.newDate.hour())
+            selected: parseInt(hour) === parseInt(this.newDate.hour()),
+            disabled: this.minTime && parseInt(hour, 10) < parseInt(this.minTime.split(':')[0])
           }
         })
       },
@@ -219,7 +224,8 @@
         return util.minutes().map(minute => {
           return {
             number: minute,
-            selected: parseInt(minute) === this.newDate.minute()
+            selected: parseInt(minute) === this.newDate.minute(),
+            disabled: this.minTime && parseInt(minute, 10) < parseInt(this.minTime.split(':')[1])
           }
         })
       },
@@ -573,6 +579,11 @@
     .vdatetime-popup__list-picker__item--selected {
         color: #3f51b5;
         font-size: 32px;
+    }
+
+    .vdatetime-popup__list-picker__item--disabled {
+      opacity: 0.4;
+      pointer-events: none;
     }
 
     .vdatetime-popup__actions {
